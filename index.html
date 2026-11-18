@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmSmart - Smart Crop Farming Management & Decision Support System</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for professional icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for interactive analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid.fa-seedling logo-icon"></i>
+                <h2>FarmSmart</h2>
+                <span class="badge-version">v2.6 KE</span>
+            </div>
+            
+            <div class="season-switcher-box">
+                <label for="activeSeasonSelect"><i class="fa-solid fa-calendar-days"></i> Active Season:</label>
+                <select id="activeSeasonSelect" class="form-select">
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-target="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</li>
+                    <li class="nav-item" data-target="profile"><i class="fa-solid fa-user-gear"></i> Farmer Profile</li>
+                    <li class="nav-item" data-target="farms"><i class="fa-solid fa-map-location-dot"></i> My Farms</li>
+                    <li class="nav-item" data-target="crops"><i class="fa-solid fa-wheat-awn"></i> Crop & Seed Selection</li>
+                    <li class="nav-item" data-target="soil"><i class="fa-solid fa-flask"></i> Soil Testing & Analysis</li>
+                    <li class="nav-item" data-target="seedCalc"><i class="fa-solid fa-calculator"></i> Seed Calculator</li>
+                    <li class="nav-item" data-target="fertilizer"><i class="fa-solid fa-bag-shopping"></i> Fertilizer Planner</li>
+                    <li class="nav-item" data-target="weed"><i class="fa-solid fa-shield-halved"></i> Weed Management</li>
+                    <li class="nav-item" data-target="pest"><i class="fa-solid fa-bugs"></i> Pest & Disease Management</li>
+                    <li class="nav-item" data-target="operations"><i class="fa-solid fa-tractor"></i> Farm Operations</li>
+                    <li class="nav-item" data-target="harvest"><i class="fa-solid fa-warehouse"></i> Harvest Management</li>
+                    <li class="nav-item" data-target="storage"><i class="fa-solid fa-box-archive"></i> Storage & Weevil Control</li>
+                    <li class="nav-item" data-target="records"><i class="fa-solid fa-book-open"></i> Farm Records</li>
+                    <li class="nav-item" data-target="budget"><i class="fa-solid fa-file-invoice-dollar"></i> Budget & Expenses</li>
+                    <li class="nav-item" data-target="profit"><i class="fa-solid fa-scale-balanced"></i> Profit & Loss</li>
+                    <li class="nav-item" data-target="comparison"><i class="fa-solid fa-chart-line"></i> Season Comparison</li>
+                    <li class="nav-item" data-target="reports"><i class="fa-solid fa-print"></i> Reports & Export</li>
+                    <li class="nav-item" data-target="settings"><i class="fa-solid fa-gears"></i> Data & Settings</li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Based on KALRO & KEPHIS Standards</p>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button id="sidebarToggle" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
+                    <h1 id="pageTitle">Dashboard Overview</h1>
+                </div>
+                <div class="header-right">
+                    <div class="quick-farm-display">
+                        <i class="fa-solid fa-location-dot"></i> <span id="currentFarmNameHeader">No Farm Selected</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="globalAddBtn"><i class="fa-solid fa-plus"></i> Quick Record</button>
+                </div>
+            </header>
+
+            <!-- Content Sections Container -->
+            <div class="content-body">
+
+                <!-- 1. DASHBOARD -->
+                <section id="sec-dashboard" class="app-section active">
+                    <div class="dashboard-cards">
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-green"><i class="fa-solid fa-map"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Farms</h3>
+                                <p id="statTotalFarms">0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-blue"><i class="fa-solid fa-chart-area"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Cultivated Acres</h3>
+                                <p id="statTotalAcreage">0.0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-orange"><i class="fa-solid fa-money-bill-wave"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Expenses (KES)</h3>
+                                <p id="statTotalExpenses">KES 0</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-purple"><i class="fa-solid fa-sack-dollar"></i></div>
+                            <div class="stat-info">
+                                <h3>Net Profit / Loss</h3>
+                                <p id="statNetProfit">KES 0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card chart-card">
+                            <h3>Cost Distribution by Activity</h3>
+                            <canvas id="chartCostDistribution"></canvas>
+                        </div>
+                        <div class="card chart-card">
+                            <h3>Expected vs. Actual Yield (kg)</h3>
+                            <canvas id="chartYieldComparison"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card chart-card">
+                            <h3>Seasonal Profitability (KES)</h3>
+                            <canvas id="chartSeasonalProfit"></canvas>
+                        </div>
+                        <div class="card table-card">
+                            <h3>Active Farm Operations</h3>
+                            <div class="table-responsive">
+                                <table class="data-table" id="dashboardOperationsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Farm</th>
+                                            <th>Activity</th>
+                                            <th>Cost (KES)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Populated via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. FARMER PROFILE -->
+                <section id="sec-profile" class="app-section">
+                    <div class="card">
+                        <h2>Farmer Registration & Profile</h2>
+                        <p class="section-desc">Manage your personal details and primary location parameters for tailored agronomic advisories.</p>
+                        <form id="profileForm" class="grid-form">
+                            <div class="form-group">
+                                <label>Farmer's Full Name *</label>
+                                <input type="text" id="profName" class="form-control" required placeholder="e.g. John Kipkorir">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number (Optional)</label>
+                                <input type="text" id="profPhone" class="form-control" placeholder="e.g. +254712345678">
+                            </div>
+                            <div class="form-group">
+                                <label>County *</label>
+                                <select id="profCounty" class="form-control" required>
+                                    <option value="">Select County</option>
+                                    <option value="Uasin Gishu">Uasin Gishu</option>
+                                    <option value="Nakuru">Nakuru</option>
+                                    <option value="Trans Nzoia">Trans Nzoia</option>
+                                    <option value="Machakos">Machakos</option>
+                                    <option value="Kiambu">Kiambu</option>
+                                    <option value="Meru">Meru</option>
+                                    <option value="Kisumu">Kisumu</option>
+                                    <option value="Kakamega">Kakamega</option>
+                                    <option value="Bungoma">Bungoma</option>
+                                    <option value="Other">Other East African Region</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Sub-County *</label>
+                                <input type="text" id="profSubCounty" class="form-control" required placeholder="e.g. Moiben">
+                            </div>
+                            <div class="form-group">
+                                <label>Ward *</label>
+                                <input type="text" id="profWard" class="form-control" required placeholder="e.g. Karuna/Meibeki">
+                            </div>
+                            <div class="form-group">
+                                <label>Village / Location</label>
+                                <input type="text" id="profVillage" class="form-control" placeholder="e.g. Chepkemel">
+                            </div>
+                            <div class="form-actions full-width">
+                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-save"></i> Save Farmer Profile</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- 3. MY FARMS -->
+                <section id="sec-farms" class="app-section">
+                    <div class="card-header-flex">
+                        <h2>Farm Parcels Management</h2>
+                        <button class="btn btn-primary" id="openAddFarmModal"><i class="fa-solid fa-plus"></i> Add New Farm</button>
+                    </div>
+                    <div class="table-responsive card mt-3">
+                        <table class="data-table" id="farmsTable">
+                            <thead>
+                                <tr>
+                                    <th>Farm Name</th>
+                                    <th>Size</th>
+                                    <th>Altitude (m)</th>
+                                    <th>Soil Type</th>
+                                    <th>Drainage</th>
+                                    <th>Irrigation</th>
+                                    <th>Main Crops</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 4. CROP & SEED SELECTION -->
+                <section id="sec-crops" class="app-section">
+                    <div class="card">
+                        <h2>Intelligent Crop & Seed Recommendation System</h2>
+                        <p class="section-desc">Get scientifically validated variety recommendations based on KALRO & KEPHIS guidelines for your specific agro-ecological zone and altitude.</p>
+                        <form id="cropRecForm" class="grid-form">
+                            <div class="form-group">
+                                <label>Select Farm</label>
+                                <select id="recFarmSelect" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Crop Type</label>
+                                <select id="recCropType" class="form-control" required>
+                                    <option value="Maize">Maize</option>
+                                    <option value="Beans">Beans</option>
+                                    <option value="Sorghum">Sorghum</option>
+                                    <option value="Millet">Millet</option>
+                                    <option value="Rice">Rice</option>
+                                    <option value="Wheat">Wheat</option>
+                                    <option value="Potatoes">Potatoes</option>
+                                    <option value="Soybeans">Soybeans</option>
+                                    <option value="Groundnuts">Groundnuts</option>
+                                    <option value="Green grams">Green grams</option>
+                                    <option value="Cowpeas">Cowpeas</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Planting Season</label>
+                                <select id="recSeason" class="form-control">
+                                    <option value="Long Rains">Long Rains (March - May)</option>
+                                    <option value="Short Rains">Short Rains (October - December)</option>
+                                    <option value="Irrigated/Off-Season">Irrigated / Off-Season</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Rainfall</label>
+                                <select id="recRainfall" class="form-control">
+                                    <option value="High (>1000mm)">High (>1000mm)</option>
+                                    <option value="Moderate (500-1000mm)">Moderate (500-1000mm)</option>
+                                    <option value="Low (<500mm)">Low (<500mm)</option>
+                                </select>
+                            </div>
+                            <div class="form-actions full-width">
+                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-brain"></i> Generate Recommendations</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card mt-3" id="cropRecResultsCard" style="display:none;">
+                        <h3>Suitability Analysis & Certified Seed Varieties</h3>
+                        <div id="cropRecResultsContainer"></div>
+                    </div>
+                </section>
+
+                <!-- 5. SOIL TESTING -->
+                <section id="sec-soil" class="app-section">
+                    <div class="card">
+                        <h2>Soil Laboratory Test Results & Interpretation</h2>
+                        <p class="section-desc">Upload lab reports (PDF, JPG, PNG, CSV) or input parameters manually for instant agronomic interpretation.</p>
+                        
+                        <div class="upload-box" id="soilDropZone">
+                            <i class="fa-solid fa-cloud-arrow-up fa-3x"></i>
+                            <p>Drag & drop soil lab report here, or <label for="soilFileInput" class="file-browse-lbl">browse file</label></p>
+                            <input type="file" id="soilFileInput" accept=".pdf,.jpg,.jpeg,.png,.csv" style="display:none;">
+                            <span id="soilFileName" class="file-name-display">No file selected</span>
+                        </div>
+
+                        <form id="soilForm" class="grid-form mt-3">
+                            <div class="form-group">
+                                <label>Farm</label>
+                                <select id="soilFarmSelect" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Soil pH (1:2.5 water)</label>
+                                <input type="number" step="0.1" id="soilPh" class="form-control" placeholder="e.g. 5.8">
+                            </div>
+                            <div class="form-group">
+                                <label>Organic Carbon (%)</label>
+                                <input type="number" step="0.01" id="soilOc" class="form-control" placeholder="e.g. 1.8">
+                            </div>
+                            <div class="form-group">
+                                <label>Total Nitrogen (%)</label>
+                                <input type="number" step="0.001" id="soilN" class="form-control" placeholder="e.g. 0.15">
+                            </div>
+                            <div class="form-group">
+                                <label>Available Phosphorus (ppm)</label>
+                                <input type="number" step="0.1" id="soilP" class="form-control" placeholder="e.g. 12.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Exchangeable Potassium (me%)</label>
+                                <input type="number" step="0.01" id="soilK" class="form-control" placeholder="e.g. 0.45">
+                            </div>
+                            <div class="form-group">
+                                <label>Soil Texture</label>
+                                <select id="soilTexture" class="form-control">
+                                    <option value="Clay Loam">Clay Loam</option>
+                                    <option value="Sandy Clay">Sandy Clay</option>
+                                    <option value="Sandy Loam">Sandy Loam</option>
+                                    <option value="Clay">Clay</option>
+                                    <option value="Loam">Loam</option>
+                                </select>
+                            </div>
+                            <div class="form-actions full-width">
+                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-flask-vial"></i> Analyze Soil & Generate Recommendations</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card mt-3" id="soilAnalysisResults" style="display:none;">
+                        <h3>Soil Test Interpretation & Action Plan</h3>
+                        <div id="soilInterpretationContainer"></div>
+                    </div>
+                </section>
+
+                <!-- 6. SEED CALCULATOR -->
+                <section id="sec-seed-calc" class="app-section">
+                    <div class="card">
+                        <h2>Seed Rate, Spacing & Plant Population Calculator</h2>
+                        <p class="section-desc">Determine exact seed quantity required based on farm dimensions, row spacing, germination rate, and field establishment.</p>
+                        
+                        <form id="seedCalcForm" class="grid-form">
+                            <div class="form-group">
+                                <label>Farm Area (Acres)</label>
+                                <input type="number" step="0.1" id="scArea" class="form-control" value="2.5" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Row Spacing (cm)</label>
+                                <input type="number" step="1" id="scRowSpace" class="form-control" value="75" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Plant Spacing in Row (cm)</label>
+                                <input type="number" step="1" id="scPlantSpace" class="form-control" value="25" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Seeds per Planting Station</label>
+                                <input type="number" step="1" id="scSeedsPerStation" class="form-control" value="2" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Germination Rate (%)</label>
+                                <input type="number" step="1" id="scGermRate" class="form-control" value="90" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Field Establishment Rate (%)</label>
+                                <input type="number" step="1" id="scEstRate" class="form-control" value="95" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Weight per 1,000 Seeds (grams)</label>
+                                <input type="number" step="1" id="scSeedWeight1000" class="form-control" value="350" placeholder="e.g. 350g for maize">
+                            </div>
+                            <div class="form-actions full-width">
+                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-calculator"></i> Calculate Seed Requirement</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card mt-3" id="seedCalcResultsCard" style="display:none;">
+                        <h3>Planting & Seed Estimation Results</h3>
+                        <div class="results-grid" id="seedCalcResultsContainer"></div>
+                    </div>
+                </section>
+
+                <!-- 7. FERTILIZER PLANNER -->
+                <section id="sec-fertilizer" class="app-section">
+                    <div class="card">
+                        <h2>Fertilizer Planner & Input Calculator</h2>
+                        <p class="section-desc">Plan basal and top-dressing applications (DAP, NPK, CAN, Urea, manure) with precise quantity and cost breakdown.</p>
+                        <form id="fertForm" class="grid-form">
+                            <div class="form-group">
+                                <label>Farm Acreage</label>
+                                <input type="number" step="0.1" id="fertAcreage" class="form-control" value="2.5" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fertilizer Type</label>
+                                <select id="fertType" class="form-control">
+                                    <option value="DAP">DAP (Diammonium Phosphate - Basal)</option>
+                                    <option value="NPK">NPK 17:17:17 (Compound - Basal)</option>
+                                    <option value="CAN">CAN (Calcium Ammonium Nitrate - Top Dress)</option>
+                                    <option value="Urea">Urea 46% N (Top Dress)</option>
+                                    <option value="Manure">Farmyard Manure / Compost</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Application Rate per Acre (kg)</label>
+                                <input type="number" step="1" id="fertRate" class="form-control" value="50" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Price per 50kg Bag (KES)</label>
+                                <input type="number" step="1" id="fertPriceBag" class="form-control" value="6200" required>
+                            </div>
+                            <div class="form-actions full-width">
+                                <button type="submit" class="btn btn-success"><i class="fa-solid fa-coins"></i> Calculate Fertilizer Requirements</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card mt-3" id="fertResultsCard" style="display:none;">
+                        <h3>Fertilizer Budget & Application Schedule</h3>
+                        <div id="fertResultsContainer"></div>
+                    </div>
+                </section>
+
+                <!-- 8. WEED MANAGEMENT -->
+                <section id="sec-weed" class="app-section">
+                    <div class="card-header-flex">
+                        <h2>Weed Management Records</h2>
+                        <button class="btn btn-primary" id="openAddWeedModal"><i class="fa-solid fa-plus"></i> Record Weed Control</button>
+                    </div>
+                    <div class="table-responsive card mt-3">
+                        <table class="data-table" id="weedTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Farm</th>
+                                    <th>Method</th>
+                                    <th>Product / Tool</th>
+                                    <th>Area Treated</th>
+                                    <th>Cost (KES)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 9. PEST & DISEASE MANAGEMENT -->
+                <section id="sec-pest" class="app-section">
+                    <div class="card-header-flex">
+                        <h2>Pest & Disease Management (IPM)</h2>
+                        <button class="btn btn-primary" id="openAddPestModal"><i class="fa-solid fa-plus"></i> Record Pest/Disease Event</button>
+                    </div>
+                    <div class="table-responsive card mt-3">
+                        <table class="data-table" id="pestTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Crop / Farm</th>
+                                    <th>Pest / Disease</th>
+                                    <th>Control Method</th>
+                                    <th>Product Used</th>
+                                    <th>Cost (KES)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 10. FARM OPERATIONS -->
+                <section id="sec-operations" class="app-section">
+                    <div class="card-header-flex">
+                        <h2>Farm Operations Log</h2>
+                        <button class="btn btn-primary" id="openAddOpModal"><i class="fa-solid fa-plus"></i> Add Operation Record</button>
+                    </div>
+                    <div class="table-responsive card mt-3">
+                        <table class="data-table" id="operationsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Farm</th>
+                                    <th>Activity</th>
+                                    <th>Area (Acres)</th>
+                                    <th>Labour</th>
+                                    <th>Machinery</th>
+                                    <th>Cost (KES)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 11. HARVEST MANAGEMENT -->
+                <section id="sec-harvest" class="app-section">
+                    <div class="card-header-flex">
+                        <h2>Harvest Forecasting & Monitoring</h2>
+                        <button class="btn btn-primary" id="openAddHarvestModal"><i class="fa-solid fa-plus"></i> Record Harvest</button>
+                    </div>
+                    <div class="table-responsive card mt-3">
+                        <table class="data-table" id="harvestTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Farm / Crop</th>
+                                    <th>Area Harvested</th>
+                                    <th>Actual Yield (kg)</th>
+                                    <th>Sold (kg)</th>
+                                    <th>Stored (kg)</th>
+                                    <th>Losses (kg)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 12. STORAGE MANAGEMENT -->
+                <section id="sec-storage" class="app-section">
+                    <div class="card-header-flex">
+                        <h2>Storage & Weevil Control Management</h2>
+                        <button class="btn btn-primary" id="openAddStorageModal"><i class="fa-solid fa-plus"></i> Add Storage Record</button>
+                    </div>
+                    <div class="table-responsive card mt-3">
+                        <table class="data-table" id="storageTable">
+                            <thead>
+                                <tr>
+                                    <th>Storage Date</th>
+                                    <th>Facility</th>
+                                    <th>Qty Stored (kg)</th>
+                                    <th>Moisture (%)</th>
+                                    <th>Packaging</th>
+                                    <th>Picity / Treatment</th>
+                                    <th>Stock Remaining</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 13. FARM RECORDS -->
+                <section id="sec-records" class="app-section">
+                    <div class="card">
+                        <h2>Chronological Farm Activity & Event History</h2>
+                        <p class="section-desc">Comprehensive log of all agronomic and financial events across seasons.</p>
+                        <div class="table-responsive mt-3">
+                            <table class="data-table" id="chronologicalTable">
+                               <thead>
+                                   <tr>
+                                       <th>Date</th>
+                                       <th>Season</th>
+                                       <th>Farm</th>
+                                       <th>Category</th>
+                                       <th>Description / Activity</th>
+                                       <th>Cost (KES)</th>
+                                   </tr>
+                               </thead>
+                               <tbody></tbody>
+                           </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 14. BUDGET & EXPENSES -->
+                <section id="sec-budget" class="app-section">
+                    <div class="card">
+                        <h2>Farm Budgeting & Financial Management</h2>
+                        <p class="section-desc">Plan and track input expenditure, labor, machinery hire, and expected revenues.</p>
+                        
+                        <div class="budget-summary-grid">
+                            <div class="stat-card">
+                                <h3>Total Production Cost</h3>
+                                <p id="budTotalCost">KES 0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Cost per Acre</h3>
+                                <p id="budCostPerAcre">KES 0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Expected Gross Revenue</h3>
+                                <p id="budExpectedRev">KES 0</p>
+                            </div>
+                        </div>
+
+                        <div class="card-header-flex mt-3">
+                            <h3>Budget Line Items</h3>
+                            <button class="btn btn-primary btn-sm" id="openAddBudgetItemModal"><i class="fa-solid fa-plus"></i> Add Expense Item</button>
+                        </div>
+                        <div class="table-responsive mt-2">
+                            <table class="data-table" id="budgetTable">
+                               <thead>
+                                   <tr>
+                                       <th>Category</th>
+                                       <th>Item Description</th>
+                                       <th>Quantity</th>
+                                       <th>Unit Price (KES)</th>
+                                       <th>Total Cost (KES)</th>
+                                       <th>Actions</th>
+                                   </tr>
+                               </thead>
+                               <tbody></tbody>
+                           </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 15. PROFIT & LOSS -->
+                <section id="sec-profit" class="app-section">
+                    <div class="card">
+                        <h2>Profit & Loss Analysis</h2>
+                        <p class="section-desc">Comprehensive economic evaluation including ROI, break-even yield, and net margins.</p>
+                        
+                        <div class="results-grid" id="pnlContainer">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 16. SEASON COMPARISON -->
+                <section id="sec-comparison" class="app-section">
+                    <div class="card">
+                        <h2>Multi-Season Farm Performance Comparison</h2>
+                        <p class="section-desc">Compare yields, costs, and profitability across different agricultural seasons.</p>
+                        <div class="form-group mb-3">
+                            <label>Select Seasons to Compare</label>
+                            <div id="seasonCheckboxes" class="checkbox-group"></div>
+                            <button class="btn btn-primary mt-2" id="compareSeasonsBtn"><i class="fa-solid fa-code-compare"></i> Compare Selected Seasons</button>
+                        </div>
+                        <div class="table-responsive mt-3" id="seasonComparisonResults">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 17. REPORTS -->
+                <section id="sec-reports" class="app-section">
+                    <div class="card">
+                        <h2>Printable & Downloadable Farming Reports</h2>
+                        <p class="section-desc">Generate professional summary reports for extension officers, lenders, or personal records.</p>
+                        <div class="report-actions">
+                            <button class="btn btn-success" id="printReportBtn"><i class="fa-solid fa-print"></i> Print / Save PDF Report</button>
+                            <button class="btn btn-primary" id="exportCsvBtn"><i class="fa-solid fa-file-csv"></i> Export Records to CSV</button>
+                            <button class="btn btn-secondary" id="exportJsonBtn"><i class="fa-solid fa-file-code"></i> Backup Project Data (JSON)</button>
+                        </div>
+
+                        <div class="report-preview-box mt-4" id="printableReportContent">
+                            <div class="report-header">
+                                <h2>FARMSMART AGRICULTURAL MANAGEMENT REPORT</h2>
+                                <p id="repGenDate">Generated on: </p>
+                            </div>
+                            <hr>
+                            <div id="repBodyContent">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 18. SETTINGS -->
+                <section id="sec-settings" class="app-section">
+                    <div class="card">
+                        <h2>Data Storage, Backup & System Settings</h2>
+                        <p class="section-desc">FarmSmart runs locally in your browser using LocalStorage and IndexedDB. Ensure regular backups of your project data.</p>
+                        
+                        <div class="settings-grid mt-3">
+                            <div class="setting-box">
+                                <h3>Restore Data</h3>
+                                <p>Upload a previously exported JSON backup file to restore your farms, seasons, and records.</p>
+                                <input type="file" id="restoreJsonInput" accept=".json" class="form-control mb-2">
+                                <button class="btn btn-primary" id="restoreJsonBtn"><i class="fa-solid fa-upload"></i> Restore from JSON</button>
+                            </div>
+                            <div class="setting-box">
+                                <h3>Reset Application Data</h3>
+                                <p>Clear all local data and reload default demonstration data for Kenya.</p>
+                                <button class="btn btn-danger" id="resetDataBtn"><i class="fa-solid fa-triangle-exclamation"></i> Reset to Demo Data</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Add/Edit Farm Modal -->
+    <div id="farmModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeFarmModal">&times;</span>
+            <h2 id="farmModalTitle">Add New Farm</h2>
+            <form id="farmForm" class="grid-form mt-2">
+                <input type="hidden" id="farmId">
+                <div class="form-group">
+                    <label>Farm Name *</label>
+                    <input type="text" id="fName" class="form-control" required placeholder="e.g. Riverside Plot">
+                </div>
+                <div class="form-group">
+                    <label>Farm Size (Acres) *</label>
+                    <input type="number" step="0.1" id="fSize" class="form-control" required placeholder="e.g. 5.0">
+                </div>
+                <div class="form-group">
+                    <label>Altitude (m above sea level)</label>
+                    <input type="number" id="fAltitude" class="form-control" placeholder="e.g. 2100">
+                </div>
+                <div class="form-group">
+                    <label>Soil Type</label>
+                    <select id="fSoilType" class="form-control">
+                        <option value="Clay Loam">Clay Loam (Nitosols)</option>
+                        <option value="Sandy Loam">Sandy Loam</option>
+                        <option value="Black Cotton">Black Cotton (Vertisols)</option>
+                        <option value="Volcanic Ash">Volcanic Ash (Andosols)</option>
+                        <option value="Red Clay">Red Clay</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Soil Drainage</label>
+                    <select id="fDrainage" class="form-control">
+                        <option value="Well Drained">Well Drained</option>
+                        <option value="Moderate">Moderate</option>
+                        <option value="Imperfectly Drained">Imperfectly Drained</option>
+                        <option value="Poorly Drained">Poorly Drained</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Irrigation Availability</label>
+                    <select id="fIrrigation" class="form-control">
+                        <option value="Rainfed Only">Rainfed Only</option>
+                        <option value="Supplemental Irrigation">Supplemental Irrigation</option>
+                        <option value="Fully Irrigated">Fully Irrigated</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Main Crops Grown (Comma separated)</label>
+                    <input type="text" id="fMainCrops" class="form-control" placeholder="e.g. Maize, Beans, Potatoes">
+                </div>
+                <div class="form-actions full-width">
+                    <button type="submit" class="btn btn-success">Save Farm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Activity Modal -->
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeActivityModal">&times;</span>
+            <h2 id="activityModalTitle">Record Farm Operation</h2>
+            <form id="activityForm" class="grid-form mt-2">
+                <input type="hidden" id="actId">
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" id="actDate" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Farm *</label>
+                    <select id="actFarmSelect" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Activity Category *</label>
+                    <select id="actCategory" class="form-control" required>
+                        <option value="Land Preparation">Land Preparation</option>
+                        <option value="Planting">Planting</option>
+                        <option value="Weed Management">Weed Management</option>
+                        <option value="Pest/Disease Control">Pest/Disease Control</option>
+                        <option value="Fertilizer Application">Fertilizer Application</option>
+                        <option value="Harvesting">Harvesting</option>
+                        <option value="Storage & Post-Harvest">Storage & Post-Harvest</option>
+                        <option value="General Labour">General Labour</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Area Covered (Acres)</label>
+                    <input type="number" step="0.1" id="actArea" class="form-control" value="1.0">
+                </div>
+                <div class="form-group">
+                    <label>Materials / Inputs Used</label>
+                    <input type="text" id="actMaterials" class="form-control" placeholder="e.g. Seeds, Herbicide, DAP">
+                </div>
+                <div class="form-group">
+                    <label>Labour Cost (KES)</label>
+                    <input type="number" id="actLabourCost" class="form-control" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Total Cost (KES) *</label>
+                    <input type="number" id="actTotalCost" class="form-control" required value="0">
+                </div>
+                <div class="form-group full-width">
+                    <label>Remarks / Supplier / Remarks</label>
+                    <textarea id="actRemarks" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-actions full-width">
+                    <button type="submit" class="btn btn-success">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Item Modal -->
+    <div id="budgetItemModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeBudgetItemModal">&times;</span>
+            <h2>Add Budget Expense Item</h2>
+            <form id="budgetItemForm" class="grid-form mt-2">
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="biCategory" class="form-control" required>
+                        <option value="Land Preparation">Land Preparation</option>
+                        <option value="Seeds">Seeds</option>
+                        <option value="Fertilizers">Fertilizers</option>
+                        <option value="Herbicides">Herbicides</option>
+                        <option value="Pesticides">Pesticides</option>
+                        <option value="Labour">Labour</option>
+                        <option value="Machinery Hire">Machinery Hire</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Harvesting & Threshing">Harvesting & Threshing</option>
+                        <option value="Storage">Storage</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Item Description *</label>
+                    <input type="text" id="biDesc" class="form-control" required placeholder="e.g. Certified Seed 10kg">
+                </div>
+                <div class="form-group">
+                    <label>Quantity *</label>
+                    <input type="number" step="0.1" id="biQty" class="form-control" required value="1">
+                </div>
+                <div class="form-group">
+                    <label>Unit Price (KES) *</label>
+                    <input type="number" step="1" id="biPrice" class="form-control" required value="0">
+                </div>
+                <div class="form-actions full-width">
+                    <button type="submit" class="btn btn-success">Save Budget Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
